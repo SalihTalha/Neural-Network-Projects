@@ -1,17 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[9]:
-
-
-# ATTENTION: Please do not alter any of the provided code in the exercise. Only add your own code where indicated
-# ATTENTION: Please do not add or remove any cells in the exercise. The grader will check specific cells based on the cell position.
-# ATTENTION: Please use the provided epoch values when training.
-
-# In this exercise you will train a CNN on the FULL Cats-v-dogs dataset
-# This will require you doing a lot of data preprocessing because
-# the dataset isn't split into training and validation for you
-# This code block has all the required inputs
 import os
 import zipfile
 import random
@@ -22,13 +11,6 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from shutil import copyfile
 from os import getcwd
 
-
-# In[10]:
-
-
-# This code block unzips the full Cats-v-Dogs dataset to /tmp
-# which will create a tmp/PetImages directory containing subdirectories
-# called 'Cat' and 'Dog' (that's how the original researchers structured it)
 path_cats_and_dogs = f"{getcwd()}/../tmp2/cats-and-dogs.zip"
 shutil.rmtree('/tmp')
 
@@ -36,10 +18,6 @@ local_zip = path_cats_and_dogs
 zip_ref = zipfile.ZipFile(local_zip, 'r')
 zip_ref.extractall('/tmp')
 zip_ref.close()
-
-
-# In[11]:
-
 
 print(len(os.listdir('/tmp/PetImages/Cat/')))
 print(len(os.listdir('/tmp/PetImages/Dog/')))
@@ -49,12 +27,6 @@ print(len(os.listdir('/tmp/PetImages/Dog/')))
 # 1500
 
 
-# In[15]:
-
-
-# Use os.mkdir to create your directories
-# You will need a directory for cats-v-dogs, and subdirectories for training
-# and testing. These in turn will need subdirectories for 'cats' and 'dogs'
 try:
     os.mkdir('/tmp/cats-v-dogs/')
     os.mkdir('/tmp/cats-v-dogs/training/')
@@ -66,9 +38,6 @@ try:
     
 except OSError:
     pass
-
-
-# In[18]:
 
 
 # Write a python function called split_data which takes
@@ -89,7 +58,6 @@ except OSError:
 # copyfile(source, destination) copies a file from source to destination
 # random.sample(list, len(list)) shuffles a list
 def split_data(SOURCE, TRAINING, TESTING, SPLIT_SIZE):
-# YOUR CODE STARTS HERE
     dataset = []
     
     for unitData in os.listdir(SOURCE):
@@ -110,8 +78,6 @@ def split_data(SOURCE, TRAINING, TESTING, SPLIT_SIZE):
         copyfile(SOURCE + unitData, TESTING + unitData)
         
         
-# YOUR CODE ENDS HERE
-
 
 CAT_SOURCE_DIR = "/tmp/PetImages/Cat/"
 TRAINING_CATS_DIR = "/tmp/cats-v-dogs/training/cats/"
@@ -124,8 +90,6 @@ split_size = .9
 split_data(CAT_SOURCE_DIR, TRAINING_CATS_DIR, TESTING_CATS_DIR, split_size)
 split_data(DOG_SOURCE_DIR, TRAINING_DOGS_DIR, TESTING_DOGS_DIR, split_size)
 
-
-# In[19]:
 
 
 print(len(os.listdir('/tmp/cats-v-dogs/training/cats/')))
@@ -140,11 +104,6 @@ print(len(os.listdir('/tmp/cats-v-dogs/testing/dogs/')))
 # 150
 
 
-# In[20]:
-
-
-# DEFINE A KERAS MODEL TO CLASSIFY CATS V DOGS
-# USE AT LEAST 3 CONVOLUTION LAYERS
 model = tf.keras.models.Sequential([
     tf.keras.layers.Conv2D(16, (3,3), activation = 'relu'),
     tf.keras.layers.MaxPooling2D(2,2),
@@ -162,11 +121,6 @@ model = tf.keras.models.Sequential([
 model.compile(optimizer=RMSprop(lr=0.001), loss='binary_crossentropy', metrics=['acc'])
 
 
-# # NOTE:
-# 
-# In the cell below you **MUST** use a batch size of 10 (`batch_size=10`) for the `train_generator` and the `validation_generator`. Using a batch size greater than 10 will exceed memory limits on the Coursera platform.
-
-# In[24]:
 
 
 TRAINING_DIR = "/tmp/cats-v-dogs/training/"
@@ -179,8 +133,6 @@ train_datagen = ImageDataGenerator(
     horizontal_flip = True
 )
 
-# NOTE: YOU MUST USE A BATCH SIZE OF 10 (batch_size=10) FOR THE 
-# TRAIN GENERATOR.
 train_generator = train_datagen.flow_from_directory(
     TRAINING_DIR,
     target_size = (150,150),
@@ -198,8 +150,7 @@ validation_datagen = ImageDataGenerator(
     horizontal_flip = True
 )
 
-# NOTE: YOU MUST USE A BACTH SIZE OF 10 (batch_size=10) FOR THE 
-# VALIDATION GENERATOR.
+
 validation_generator = train_datagen.flow_from_directory(
     VALIDATION_DIR,
     target_size = (150,150),
@@ -214,16 +165,11 @@ validation_generator = train_datagen.flow_from_directory(
 # Found 300 images belonging to 2 classes.
 
 
-# In[25]:
-
-
 history = model.fit_generator(train_generator,
                               epochs=2,
                               verbose=1,
                               validation_data=validation_generator)
 
-
-# In[26]:
 
 
 # PLOT LOSS AND ACCURACY
@@ -259,28 +205,3 @@ plt.plot(epochs, val_loss, 'b', "Validation Loss")
 
 
 plt.title('Training and validation loss')
-
-# Desired output. Charts with training and validation metrics. No crash :)
-
-
-# # Submission Instructions
-
-# In[ ]:
-
-
-# Now click the 'Submit Assignment' button above.
-
-
-# # When you're done or would like to take a break, please run the two cells below to save your work and close the Notebook. This will free up resources for your fellow learners. 
-
-# In[ ]:
-
-
-get_ipython().run_cell_magic('javascript', '', '<!-- Save the notebook -->\nIPython.notebook.save_checkpoint();')
-
-
-# In[ ]:
-
-
-get_ipython().run_cell_magic('javascript', '', 'IPython.notebook.session.delete();\nwindow.onbeforeunload = null\nsetTimeout(function() { window.close(); }, 1000);')
-
